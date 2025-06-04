@@ -1,0 +1,47 @@
+
+services:
+
+  llama3.2:
+    provider:
+      type: model
+      options:
+        model: ai/llama3.2
+
+  qwen3:
+    provider:
+      type: model
+      options:
+        model: jimclark106/qwen3:4b-F16
+
+  mcp-gateway:
+    provider:
+      type: mcp
+      options:
+        tools: brave_web_search,get_article,get_summary,get_related_topics,send-email
+        name: research
+
+  chat-store:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=slim
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=chatstore
+    volumes:
+      - chat_store:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  mcp-ui:
+    image: chat
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://slim:pass@chat-store:5432/chatstore
+    depends_on:
+      - llama3.2
+      - qwen3
+      - mcp-gateway
+      - chat-store
+
+volumes:
+  chat_store:

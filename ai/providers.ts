@@ -2,11 +2,13 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { createGroq } from "@ai-sdk/groq";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createXai } from "@ai-sdk/xai";
+import { createDMR } from "./dmr";
 
-import { 
-  customProvider, 
-  wrapLanguageModel, 
-  extractReasoningMiddleware 
+
+import {
+  customProvider,
+  wrapLanguageModel,
+  extractReasoningMiddleware
 } from "ai";
 
 export interface ModelInfo {
@@ -27,12 +29,12 @@ const getApiKey = (key: string): string | undefined => {
   if (process.env[key]) {
     return process.env[key] || undefined;
   }
-  
+
   // Fall back to localStorage if available
   if (typeof window !== 'undefined') {
     return window.localStorage.getItem(key) || undefined;
   }
-  
+
   return undefined;
 };
 
@@ -53,6 +55,10 @@ const xaiClient = createXai({
   apiKey: getApiKey('XAI_API_KEY'),
 });
 
+const dmrClient = createDMR({
+  baseURL: 'http://localhost:12434/engines/llama.cpp/v1'
+});
+
 const languageModels = {
   "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
   "claude-3-7-sonnet": anthropicClient('claude-3-7-sonnet-20250219'),
@@ -63,6 +69,18 @@ const languageModels = {
     }
   ),
   "grok-3-mini": xaiClient("grok-3-mini-latest"),
+  "llama3.2": wrapLanguageModel(
+    {
+      model: dmrClient("ai/llama3.2", { stream: false }),
+      middleware
+    }
+  ),
+  "qwen3:4b-F16": wrapLanguageModel(
+    {
+      model: dmrClient("jimclark106/qwen3:4b-F16", { stream: false }),
+      middleware
+    }
+  ),
 };
 
 export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
@@ -94,6 +112,20 @@ export const modelDetails: Record<keyof typeof languageModels, ModelInfo> = {
     apiVersion: "grok-3-mini-latest",
     capabilities: ["Reasoning", "Efficient", "Agentic"]
   },
+  "llama3.2": {
+    provider: "Docker Model Runner",
+    name: "Llama 3.2",
+    description: "Meta's Llama 3.2 model running locally via Docker Model Runner.",
+    apiVersion: "llama3.2",
+    capabilities: ["Local", "Efficient", "Open Source"]
+  },
+  "qwen3:4b-F16": {
+    provider: "Docker Model Runner",
+    name: "Qwen3 4B F16",
+    description: "Qwen3 4B model without quantization running via Docker Model Runner.",
+    apiVersion: "qwen3:4b-F16",
+    capabilities: ["Local", "Open Source"]
+  },
 };
 
 // Update API keys when localStorage changes (for runtime updates)
@@ -114,4 +146,4 @@ export type modelID = keyof typeof languageModels;
 
 export const MODELS = Object.keys(languageModels);
 
-export const defaultModel: modelID = "qwen-qwq";
+export const defaultModel: modelID = "llama3.2";
