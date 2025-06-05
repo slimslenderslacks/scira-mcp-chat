@@ -1,6 +1,9 @@
 
 services:
 
+  #########
+  # LLMS
+  #########
   llama3.2:
     provider:
       type: model
@@ -13,13 +16,29 @@ services:
       options:
         model: jimclark106/qwen3:4b-F16
 
+  #########
+  # MCPS
+  ########
+  # the mcp-gateway surfaces a restricted view of the tools
+  # exposed by the MCP Toolkit
+  # access gateway using SSE over http://mcp-gateway:9011/sse/...
   mcp-gateway:
-    provider:
-      type: mcp
-      options:
-        tools: brave_web_search,get_article,get_summary,get_related_topics,send-email
-        name: research
+    image: mcp/docker:0.0.18
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "docker-prompts:/prompts"
+      - "/var/run/docker.raw.sock:/var/run/docker.raw.sock"
+      - "/run/host-services/backend.sock:/backend.sock"
+      - "/run/guest-services/jfs.sock:/jfs.sock"
+    command:
+      - --config
+      - |
+        config:
+          tools: brave_web_search,get_article,get_summary,get_related_topics,send-email
+          name: myview
 
+  # chat-store DB gives our app simple persistence for 
+  # storing history of messages and threads
   chat-store:
     image: postgres:15-alpine
     environment:
@@ -31,6 +50,9 @@ services:
     ports:
       - "5432:5432"
 
+  ##########
+  # AGENT UI
+  ##########
   mcp-ui:
     image: mcp-ui
     build:
@@ -40,6 +62,7 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://slim:pass@chat-store:5432/chatstore
+      - MCP_GATEWAY_URL=http://mcp-gateway:9011/sse/myview
     depends_on:
       - llama3.2
       - qwen3
@@ -48,3 +71,6 @@ services:
 
 volumes:
   chat_store:
+  docker-prompts:
+    name: docker-prompts
+
