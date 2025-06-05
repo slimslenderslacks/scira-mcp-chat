@@ -32,7 +32,10 @@ services:
       - "5432:5432"
 
   mcp-ui:
-    image: chat
+    image: mcp-ui
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:

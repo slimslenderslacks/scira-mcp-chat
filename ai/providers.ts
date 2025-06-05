@@ -56,7 +56,7 @@ const xaiClient = createXai({
 });
 
 const dmrClient = createDMR({
-  baseURL: 'http://localhost:12434/engines/llama.cpp/v1'
+  baseURL: 'http://model-runner.docker.internal/engines/llama.cpp/v1'
 });
 
 const languageModels = {

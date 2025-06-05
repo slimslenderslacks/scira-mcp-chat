@@ -15,7 +15,7 @@ RUN pnpm install
 
 COPY . .
 
-RUN pnpm run build
+#RUN pnpm run build
 
 # Create non-root user
 #RUN addgroup -g 1001 -S nodejs
