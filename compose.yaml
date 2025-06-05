@@ -33,6 +33,17 @@ services:
     command:
       - --config
       - |
+        registry:
+          brave:
+            ref: github:docker/labs-ai-tools-for-devs?ref=main&path=prompts/mcp/brave.md
+          wikipedia:
+            ref: github:docker/labs-ai-tools-for-devs?ref=main&path=prompts/mcp/wikipedia-mcp.md
+          resend:
+            ref: github:docker/labs-ai-tools-for-devs?ref=main&path=prompts/mcp/resend.md
+            config:
+              resend:
+                reply_to: slimslenderslacks@gmail.com
+                sender: slimslenderslacks@slimslenderslacks.com
         config:
           tools: brave_web_search,get_article,get_summary,get_related_topics,send-email
           name: myview
@@ -49,6 +60,23 @@ services:
       - chat_store:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slim -d chatstore"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  initialize-chat-store-schema:
+    image: initialize-chat-store-schema
+    build:
+      context: .
+      dockerfile: Dockerfile.initialize-chat-store-schema
+    environment:
+      - DATABASE_URL=postgresql://slim:pass@chat-store:5432/chatstore
+    depends_on:
+      chat-store:
+        condition: service_healthy
 
   ##########
   # AGENT UI
@@ -68,6 +96,7 @@ services:
       - qwen3
       - mcp-gateway
       - chat-store
+      - initialize-chat-store-schema
 
 volumes:
   chat_store:

@@ -10,3 +10,13 @@ docker run --rm -it --name postgres-client postgres:15-alpine psql $DATABASE_URL
 ```sh
 pnpm drizzle-kit push:pg --driver pg --schema ./lib/db/schema.ts --connectionString postgresql://slim:pass@localhost:5432/chatstore
 ```
+
+```sh
+docker volume rm docker-prompts
+docker volume rm docker-prompts-git
+docker volume rm scira-mcp-chat_chat_store
+```
+
+```sh
+docker container rm docker-prompts
+```
