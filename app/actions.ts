@@ -18,25 +18,25 @@ function getMessageText(message: any): string {
       return textParts.map((p: any) => p.text).join('\n');
     }
   }
-  
+
   // Fallback to content (old format)
   if (typeof message.content === 'string') {
     return message.content;
   }
-  
+
   // If content is an array (potentially of parts), try to extract text
   if (Array.isArray(message.content)) {
-    const textItems = message.content.filter((item: any) => 
+    const textItems = message.content.filter((item: any) =>
       typeof item === 'string' || (item.type === 'text' && item.text)
     );
-    
+
     if (textItems.length > 0) {
-      return textItems.map((item: any) => 
+      return textItems.map((item: any) =>
         typeof item === 'string' ? item : item.text
       ).join('\n');
     }
   }
-  
+
   return '';
 }
 
@@ -46,7 +46,7 @@ export async function generateTitle(messages: any[]) {
     role: msg.role,
     content: getMessageText(msg)
   }));
-  
+
   const { object } = await generateObject({
     model: openai("gpt-4.1"),
     schema: z.object({
@@ -85,44 +85,44 @@ export async function startSandbox(params: {
   env?: KeyValuePair[];
 }): Promise<{ url: string }> {
   const { id, command, args, env } = params;
-  
+
   console.log(`[startSandbox] Starting sandbox for ID: ${id}`);
-  
+
   // Validate required fields
   if (!id || !command || !args) {
     throw new Error('Missing required fields');
   }
-  
+
   // Check if we already have a sandbox for this ID
   if (activeSandboxes.has(id)) {
     // If we do, get the URL and return it without creating a new sandbox
     const existingSandbox = activeSandboxes.get(id);
     console.log(`[startSandbox] Reusing existing sandbox for ${id}, URL: ${existingSandbox.url}`);
-    
+
     // Re-fetch the URL to make sure it's current
     try {
       const freshUrl = await existingSandbox.sandbox.getUrl();
       console.log(`[startSandbox] Updated sandbox URL for ${id}: ${freshUrl}`);
-      
+
       // Update the URL in the map
-      activeSandboxes.set(id, { 
-        sandbox: existingSandbox.sandbox, 
-        url: freshUrl 
+      activeSandboxes.set(id, {
+        sandbox: existingSandbox.sandbox,
+        url: freshUrl
       });
-      
+
       return { url: freshUrl };
     } catch (error) {
       console.error(`[startSandbox] Error refreshing sandbox URL for ${id}:`, error);
-      
+
       // Fall through to create a new sandbox if we couldn't refresh the URL
       activeSandboxes.delete(id);
       console.log(`[startSandbox] Removed stale sandbox for ${id}, will create a new one`);
     }
   }
-  
+
   // Build the command string
   let cmd: string;
-  
+
   // Prepare the command based on the type of executable
   if (command === 'uvx') {
     // For uvx, use the direct format
@@ -135,7 +135,7 @@ export async function startSandbox(params: {
     // For node or other commands
     cmd = `${command} ${args.join(' ')}`;
   }
-  
+
   // Convert env array to object if needed
   const envs: Record<string, string> = {};
   if (env && env.length > 0) {
@@ -143,17 +143,17 @@ export async function startSandbox(params: {
       if (envVar.key) envs[envVar.key] = envVar.value || '';
     });
   }
-  
+
   // Start the sandbox
   console.log(`[startSandbox] Creating new sandbox for ${id} with command: ${cmd}`);
   const sandbox = await startMcpSandbox({ cmd, envs });
   const url = await sandbox.getUrl();
-  
+
   console.log(`[startSandbox] Sandbox created for ${id}, URL: ${url}`);
-  
+
   // Store the sandbox in our map
   activeSandboxes.set(id, { sandbox, url });
-  
+
   return { url };
 }
 
@@ -164,15 +164,15 @@ export async function stopSandbox(id: string): Promise<{ success: boolean }> {
   if (!id) {
     throw new Error('Missing sandbox ID');
   }
-  
+
   // Check if we have a sandbox with this ID
   if (!activeSandboxes.has(id)) {
     throw new Error(`No active sandbox found with ID: ${id}`);
   }
-  
+
   // Stop the sandbox
   const { sandbox } = activeSandboxes.get(id);
-  
+
   try {
     await sandbox.stop();
     console.log(`Stopped sandbox with ID: ${id}`);
@@ -180,9 +180,42 @@ export async function stopSandbox(id: string): Promise<{ success: boolean }> {
     console.error(`Error stopping sandbox ${id}:`, stopError);
     // Continue to remove from the map even if stop fails
   }
-  
+
   // Remove from our map
   activeSandboxes.delete(id);
-  
+
   return { success: true };
+}
+
+/**
+ * Server action to check if a server is ready
+ */
+export async function checkServerReady(url: string, maxAttempts = 20, timeout = 3000): Promise<boolean> {
+  // Get the base URL from environment or use localhost
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+  const response = await fetch(`${baseUrl}/api/server/ready`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    next: {
+      revalidate: 0
+    },
+    cache: 'no-store',
+    body: JSON.stringify({
+      url,
+      maxAttempts,
+      timeout
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error('Error checking server readiness:', data.error);
+    return false;
+  }
+
+  return data.ready;
 }
