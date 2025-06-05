@@ -3,7 +3,7 @@ import { smoothStream, streamText, type UIMessage } from "ai";
 import { appendResponseMessages } from 'ai';
 import { saveChat, saveMessages, convertToDBMessages } from '@/lib/chat-store';
 import { nanoid } from 'nanoid';
-import { db } from '@/lib/db';
+import { db } from '@/app/db/db.server';
 import { chats } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { initializeMCPClients, type MCPServerConfig } from '@/lib/mcp-client';

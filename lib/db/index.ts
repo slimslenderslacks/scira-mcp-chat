@@ -1,11 +1,15 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
 import * as schema from "./schema";
 
-// Initialize the connection pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+// Export schema for type usage in client components
+export { schema };
 
-// Initialize Drizzle with the connection pool and schema
-export const db = drizzle(pool, { schema }); 
+// Export types that might be needed in client components
+export type Chat = typeof schema.chats.$inferSelect;
+export type Message = typeof schema.messages.$inferSelect;
+export type MessagePart = {
+  type: 'text';
+  text: string;
+} | {
+  type: 'image';
+  image_url: string;
+}; 
