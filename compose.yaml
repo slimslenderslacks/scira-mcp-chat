@@ -23,30 +23,29 @@ services:
   # exposed by the MCP Toolkit
   # access gateway using SSE over http://mcp-gateway:9011/sse/...
   mcp-gateway:
-    image: mcp/docker:0.0.18
+    image: docker/agents_gateway:v2
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "docker-prompts:/prompts"
       - "/var/run/docker.raw.sock:/var/run/docker.raw.sock"
       - "/run/host-services/backend.sock:/backend.sock"
       - "/run/guest-services/jfs.sock:/jfs.sock"
+      - "./docker-mcp.yaml:/app/docker-mcp.yaml"
+      - "./registry.yaml:/app/registry.yaml"
+      - "./config.yaml:/app/config.yaml"
+      - "./.env:/app/env"
     command:
-      - --config
-      - |
-        registry:
-          brave:
-            ref: github:docker/labs-ai-tools-for-devs?ref=main&path=prompts/mcp/brave.md
-          wikipedia:
-            ref: github:docker/labs-ai-tools-for-devs?ref=main&path=prompts/mcp/wikipedia-mcp.md
-          resend:
-            ref: github:docker/labs-ai-tools-for-devs?ref=main&path=prompts/mcp/resend.md
-            config:
-              resend:
-                reply_to: slimslenderslacks@gmail.com
-                sender: slimslenderslacks@slimslenderslacks.com
-        config:
-          tools: brave_web_search,get_article,get_summary,get_related_topics,send-email
-          name: myview
+      - --verbose
+      - --transport=sse
+      - --catalog=/app/docker-mcp.yaml
+      - --config=/app/config.yaml
+      - --registry=/app/registry.yaml
+      - --secrets=/app/env
+      - --tools=brave_web_search
+      - --tools=get_article
+      - --tools=get_summary
+      - --tools=get_related_topics
+      - --tools=send-email
+      - --port=9011
 
   # chat-store DB gives our app simple persistence for 
   # storing history of messages and threads
