@@ -1,7 +1,7 @@
 import { model, type modelID } from "@/ai/providers";
 import { smoothStream, streamText, type UIMessage } from "ai";
 import { appendResponseMessages } from 'ai';
-import { saveChat, saveMessages, convertToDBMessages } from '@/lib/chat-store';
+import { saveChat, saveMessages, convertToDBMessages, convertUIMessagesToAIMessages } from '@/lib/chat-store';
 import { nanoid } from 'nanoid';
 import { db } from '@/app/db/db.server';
 import { chats } from '@/lib/db/schema';
@@ -159,7 +159,10 @@ export async function POST(req: Request) {
         messages: allMessages,
       });
 
-      const dbMessages = convertToDBMessages(allMessages, id);
+      // Convert UI messages to AI messages format before converting to DB format
+      // Cast to UIMessage[] since the AI SDK types are compatible
+      const aiMessages = convertUIMessagesToAIMessages(allMessages as UIMessage[]);
+      const dbMessages = convertToDBMessages(aiMessages, id);
       await saveMessages({ messages: dbMessages });
 
       // Clean up resources - now this just closes the client connections

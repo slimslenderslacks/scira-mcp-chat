@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { cn } from "@/lib/utils";
-import { Sparkles, Zap, Info, Bolt, Code, Brain, Lightbulb, Image, Gauge, Rocket, Bot } from "lucide-react";
+import { Sparkles, Zap, Info, Bolt, Code, Brain, Lightbulb, Image as ImageIcon, Gauge, Rocket, Bot } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface ModelPickerProps {
@@ -19,17 +19,17 @@ interface ModelPickerProps {
 
 export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProps) => {
   const [hoveredModel, setHoveredModel] = useState<modelID | null>(null);
-  
+
   // Ensure we always have a valid model ID
   const validModelId = MODELS.includes(selectedModel) ? selectedModel : defaultModel;
-  
+
   // If the selected model is invalid, update it to the default
   useEffect(() => {
     if (selectedModel !== validModelId) {
       setSelectedModel(validModelId as modelID);
     }
   }, [selectedModel, validModelId, setSelectedModel]);
-  
+
   // Function to get the appropriate icon for each provider
   const getProviderIcon = (provider: string) => {
     switch (provider.toLowerCase()) {
@@ -47,7 +47,7 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
         return <Info className="h-3 w-3 text-blue-500" />;
     }
   };
-  
+
   // Function to get capability icon
   const getCapabilityIcon = (capability: string) => {
     switch (capability.toLowerCase()) {
@@ -58,7 +58,7 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
       case 'research':
         return <Lightbulb className="h-2.5 w-2.5" />;
       case 'vision':
-        return <Image className="h-2.5 w-2.5" />;
+        return <ImageIcon className="h-2.5 w-2.5" />;
       case 'fast':
       case 'rapid':
         return <Bolt className="h-2.5 w-2.5" />;
@@ -74,7 +74,7 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
         return <Info className="h-2.5 w-2.5" />;
     }
   };
-  
+
   // Get capability badge color
   const getCapabilityColor = (capability: string) => {
     switch (capability.toLowerCase()) {
@@ -100,7 +100,7 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
         return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
     }
   };
-  
+
   // Get current model details to display
   const displayModelId = hoveredModel || validModelId;
   const currentModelDetails = modelDetails[displayModelId];
@@ -115,16 +115,16 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
 
   return (
     <div className="absolute bottom-2 left-2 z-10">
-      <Select 
-        value={validModelId} 
-        onValueChange={handleModelChange} 
+      <Select
+        value={validModelId}
+        onValueChange={handleModelChange}
         defaultValue={validModelId}
       >
-        <SelectTrigger 
+        <SelectTrigger
           className="max-w-[200px] sm:max-w-fit sm:w-56 px-2 sm:px-3 h-8 sm:h-9 rounded-full group border-primary/20 bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 ring-offset-background focus:ring-2 focus:ring-primary/30 focus:ring-offset-2"
         >
-          <SelectValue 
-            placeholder="Select model" 
+          <SelectValue
+            placeholder="Select model"
             className="text-xs font-medium flex items-center gap-1 sm:gap-2 text-primary dark:text-primary-foreground"
           >
             <div className="flex items-center gap-1 sm:gap-2">
@@ -144,8 +144,8 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                 {MODELS.map((id) => {
                   const modelId = id as modelID;
                   return (
-                    <SelectItem 
-                      key={id} 
+                    <SelectItem
+                      key={id}
                       value={id}
                       onMouseEnter={() => setHoveredModel(modelId)}
                       onMouseLeave={() => setHoveredModel(null)}
@@ -171,7 +171,7 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                 })}
               </SelectGroup>
             </div>
-            
+
             {/* Model details column - hidden on smallest screens, visible on sm+ */}
             <div className="sm:block hidden p-2 sm:p-3 md:p-4 flex-col">
               <div>
@@ -182,11 +182,11 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                 <div className="text-xs text-muted-foreground mb-1">
                   Provider: <span className="font-medium">{currentModelDetails.provider}</span>
                 </div>
-                
+
                 {/* Capability badges */}
                 <div className="flex flex-wrap gap-1 mt-2 mb-3">
                   {currentModelDetails.capabilities.map((capability) => (
-                    <span 
+                    <span
                       key={capability}
                       className={cn(
                         "inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium",
@@ -198,12 +198,12 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                     </span>
                   ))}
                 </div>
-                
+
                 <div className="text-xs text-foreground/90 leading-relaxed mb-3 hidden md:block">
                   {currentModelDetails.description}
                 </div>
               </div>
-              
+
               <div className="bg-muted/40 rounded-md p-2 hidden md:block">
                 <div className="text-[10px] text-muted-foreground flex justify-between items-center">
                   <span>API Version:</span>
@@ -213,12 +213,12 @@ export const ModelPicker = ({ selectedModel, setSelectedModel }: ModelPickerProp
                 </div>
               </div>
             </div>
-            
+
             {/* Condensed model details for mobile only */}
             <div className="p-3 sm:hidden border-t border-border/30">
               <div className="flex flex-wrap gap-1 mb-2">
                 {currentModelDetails.capabilities.slice(0, 4).map((capability) => (
-                  <span 
+                  <span
                     key={capability}
                     className={cn(
                       "inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-medium",

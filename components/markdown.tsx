@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
 import React, { memo, useState } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -81,7 +80,7 @@ const components: Partial<Components> = {
         </code>
       );
     }
-    
+
     // For code blocks, use our custom CodeBlock component
     return <CodeBlock className={className}>{String(children).trim()}</CodeBlock>;
   },

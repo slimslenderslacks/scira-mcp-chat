@@ -2,6 +2,7 @@ import { type Chat, type Message, type MessagePart } from "./db";
 import { type DBMessage } from "./db/schema";
 import { nanoid } from "nanoid";
 import { saveMessages, saveChat, getChats, getChatById, deleteChat } from "@/app/actions/chat";
+import { type UIMessage as AISDKUIMessage } from "ai";
 
 type AIMessage = {
   role: string;
@@ -28,6 +29,39 @@ type SaveChatParams = {
 type ChatWithMessages = Chat & {
   messages: Message[];
 };
+
+// Function to convert AI SDK UI messages to simpler AIMessage format
+export function convertUIMessagesToAIMessages(uiMessages: AISDKUIMessage[]): AIMessage[] {
+  return uiMessages.map(msg => {
+    // Extract text content from complex parts
+    let content = '';
+    const simpleParts: MessagePart[] = [];
+
+    if (msg.parts) {
+      // Process each part and extract relevant information
+      for (const part of msg.parts) {
+        const anyPart = part as any; // Use any to bypass strict type checking
+
+        if (anyPart.type === 'text' && anyPart.text) {
+          content += anyPart.text;
+          simpleParts.push({ type: 'text', text: anyPart.text });
+        } else if (anyPart.type === 'image' && anyPart.image_url) {
+          // Keep image parts if they match our schema
+          simpleParts.push({ type: 'image', image_url: anyPart.image_url });
+        }
+        // Skip other complex part types like reasoning, tool invocations, etc.
+        // as they're not part of our database schema
+      }
+    }
+
+    return {
+      id: msg.id,
+      role: msg.role,
+      content: content || (typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)),
+      parts: simpleParts.length > 0 ? simpleParts : undefined
+    };
+  });
+}
 
 // Function to convert AI messages to DB format
 export function convertToDBMessages(aiMessages: AIMessage[], chatId: string): DBMessage[] {
