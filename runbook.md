@@ -20,3 +20,23 @@ docker volume rm scira-mcp-chat_chat_store
 ```sh
 docker container rm docker-prompts
 ```
+
+```sh
+docker buildx build \
+              --builder hydrobuild \
+              --push \
+              -t jimclark106/initialize-chat-store-schema \
+              --platform linux/amd64,linux/arm64 \
+              --file Dockerfile.initialize-chat-store-schema \
+              .
+```
+
+```sh
+docker buildx build \
+              -t jimclark106/mcp-ui \
+              --platform linux/amd64,linux/arm64 \
+              --builder hydrobuild \
+              --push \
+              --file Dockerfile \
+              .
+```

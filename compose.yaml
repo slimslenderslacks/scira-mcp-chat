@@ -26,9 +26,6 @@ services:
     image: docker/agents_gateway:v2
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/var/run/docker.raw.sock:/var/run/docker.raw.sock"
-      - "/run/host-services/backend.sock:/backend.sock"
-      - "/run/guest-services/jfs.sock:/jfs.sock"
       - "./docker-mcp.yaml:/app/docker-mcp.yaml"
       - "./registry.yaml:/app/registry.yaml"
       - "./config.yaml:/app/config.yaml"
@@ -67,7 +64,7 @@ services:
       start_period: 10s
 
   initialize-chat-store-schema:
-    image: initialize-chat-store-schema
+    image: jimclark106/initialize-chat-store-schema
     build:
       context: .
       dockerfile: Dockerfile.initialize-chat-store-schema
@@ -81,7 +78,7 @@ services:
   # AGENT UI
   ##########
   mcp-ui:
-    image: mcp-ui
+    image: jimclark106/mcp-ui
     build:
       context: .
       dockerfile: Dockerfile
