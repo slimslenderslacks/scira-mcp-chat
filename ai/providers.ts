@@ -55,8 +55,11 @@ const xaiClient = createXai({
   apiKey: getApiKey('XAI_API_KEY'),
 });
 
+const llama32Url = process.env['LLAMA3.2_URL'] || 'http://model-runner.docker.internal/engines/llama.cpp/v1';
+console.log('LLAMA3.2_URL environment variable:', process.env['LLAMA3.2_URL']);
+
 const dmrClient = createDMR({
-  baseURL: 'http://model-runner.docker.internal/engines/llama.cpp/v1'
+  baseURL: llama32Url
 });
 
 const languageModels = {
