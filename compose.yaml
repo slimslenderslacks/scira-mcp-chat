@@ -86,7 +86,9 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://slim:pass@chat-store:5432/chatstore
-      - MCP_GATEWAY_URL=http://mcp-gateway:9011/sse/myview
+      - MCP_GATEWAY_URL=http://mcp-gateway:9011/sse
+    extra_hosts:
+      - host.docker.internal:host-gateway
     depends_on:
       - llama3.2
       - qwen3
