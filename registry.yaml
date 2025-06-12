@@ -1,7 +1,0 @@
-registry:
-  brave:
-    ref: ""
-  resend:
-    ref: ""
-  wikipedia-mcp:
-    ref: ""

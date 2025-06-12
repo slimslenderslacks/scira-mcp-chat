@@ -26,6 +26,7 @@ services:
     image: docker/agents_gateway:v2
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/run/host-services/backend.sock:/run/host-services/backend.sock"
       - "./docker-mcp.yaml:/app/docker-mcp.yaml"
       - "./registry.yaml:/app/registry.yaml"
       - "./config.yaml:/app/config.yaml"
@@ -35,8 +36,10 @@ services:
       - --transport=sse
       - --catalog=/app/docker-mcp.yaml
       - --config=/app/config.yaml
-      - --registry=/app/registry.yaml
       - --secrets=/app/env
+      - --servers=brave
+      - --servers=resend
+      - --servers=wikipedia-mcp
       - --tools=brave_web_search
       - --tools=get_article
       - --tools=get_summary
