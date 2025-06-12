@@ -28,15 +28,13 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/run/host-services/backend.sock:/run/host-services/backend.sock"
       - "./docker-mcp.yaml:/app/docker-mcp.yaml"
-      - "./registry.yaml:/app/registry.yaml"
       - "./config.yaml:/app/config.yaml"
-      - "./.env:/app/env"
     command:
       - --verbose
       - --transport=sse
       - --catalog=/app/docker-mcp.yaml
       - --config=/app/config.yaml
-      - --secrets=/app/env
+      - --secrets=/run/secrets/mcp_secret
       - --servers=brave
       - --servers=resend
       - --servers=wikipedia-mcp
@@ -46,6 +44,8 @@ services:
       - --tools=get_related_topics
       - --tools=send-email
       - --port=9011
+    secrets:
+      - mcp_secret
 
   # chat-store DB gives our app simple persistence for 
   # storing history of messages and threads
@@ -104,3 +104,6 @@ volumes:
   docker-prompts:
     name: docker-prompts
 
+secrets:
+  mcp_secret:
+    file: ./.mcp.env
