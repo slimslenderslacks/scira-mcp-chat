@@ -147,6 +147,8 @@ export const model = customProvider({
 
 export type modelID = keyof typeof languageModels;
 
-export const MODELS = Object.keys(languageModels);
+export const MODELS = Object.keys(languageModels).filter(modelId => 
+  modelDetails[modelId as keyof typeof languageModels].provider === "Docker Model Runner"
+);
 
 export const defaultModel: modelID = "llama3.2";
