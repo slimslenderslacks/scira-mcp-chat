@@ -33,7 +33,7 @@ services:
       - --transport=sse
       - --catalog=/app/docker-mcp.yaml
       - --config=/app/config.yaml
-      - --secrets=/run/secrets/mcp_secret
+      - --secrets=docker-desktop:/run/secrets/mcp_secret
       - --servers=brave
       - --servers=resend
       - --servers=wikipedia-mcp
