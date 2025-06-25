@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useContext, useRef, useEffect } from "react";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { STORAGE_KEYS } from "@/lib/constants";
 import { startSandbox, stopSandbox, checkServerReady } from "@/app/actions";
@@ -49,6 +49,15 @@ interface MCPContextType {
 
 const MCPContext = createContext<MCPContextType | undefined>(undefined);
 
+const createDefaultMCPServer = (): MCPServer => ({
+  id: crypto.randomUUID(),
+  name: "Docker MCP Gateway",
+  url: "http://mcp-gateway:9011/sse",
+  type: "sse",
+  description: "Connect to the Docker MCP Catalog",
+  status: "connected"
+});
+
 export function MCPProvider({ children }: { children: React.ReactNode }) {
   const [mcpServers, setMcpServers] = useLocalStorage<MCPServer[]>(
     STORAGE_KEYS.MCP_SERVERS,
@@ -59,6 +68,15 @@ export function MCPProvider({ children }: { children: React.ReactNode }) {
     STORAGE_KEYS.SELECTED_MCP_SERVERS,
     []
   );
+
+  // Initialize default MCP server if none exist
+  useEffect(() => {
+    if (mcpServers.length === 0) {
+      const defaultServer = createDefaultMCPServer();
+      setMcpServers([defaultServer]);
+      setSelectedMcpServers([defaultServer.id]);
+    }
+  }, [mcpServers.length, setMcpServers, setSelectedMcpServers]);
 
   // Create a ref to track active servers and avoid unnecessary re-renders
   const activeServersRef = useRef<Record<string, boolean>>({});
