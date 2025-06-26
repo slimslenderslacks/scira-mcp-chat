@@ -26,22 +26,12 @@ services:
     image: docker/agents_gateway:v2
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./docker-mcp.yaml:/app/docker-mcp.yaml"
-      - "./config.yaml:/app/config.yaml"
     command:
       - --verbose
       - --transport=sse
-      - --catalog=/app/docker-mcp.yaml
-      - --config=/app/config.yaml
       - --secrets=docker-desktop:/run/secrets/mcp_secret
-      - --servers=brave
-      - --servers=resend
-      - --servers=wikipedia-mcp
-      - --tools=brave_web_search
-      - --tools=get_article
-      - --tools=get_summary
-      - --tools=get_related_topics
-      - --tools=send-email
+      - --servers=brave,wikipedia-mcp
+      - --tools=brave_web_search,get_article,get_summary,get_related_topics
       - --port=9011
     secrets:
       - mcp_secret
