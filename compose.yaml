@@ -26,7 +26,6 @@ services:
     image: docker/agents_gateway:v2
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/run/host-services/backend.sock:/run/host-services/backend.sock"
     command:
       - --verbose
       - --transport=sse
